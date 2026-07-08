@@ -97,32 +97,32 @@ Load_Count
 
 Demand-Prediction/
 │
-├── dataset/
-│   └── shipment_demand_dataset.xlsx
-│
-├── notebooks/
-│   └── demand_prediction.ipynb
+├── data/
+│   ├── shipment_demand_dataset.xlsx
+│   └── cleaned_shipment_demand_dataset.csv
 │
 ├── src/
-│   ├── preprocessing.py
-│   ├── feature_engineering.py
-│   ├── train_model.py
-│   └── prediction.py
+│   ├── preprocess.py
+│   └── xgboost_model.py
 │
 ├── models/
 │   └── xgboost_model.pkl
 │
 ├── results/
-│   ├── prediction.csv
-│   └── graphs.png
+│   ├── prediction_results.csv
+│   └── model_metrics.txt
 │
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── .gitignore
 
 
 ## Future Enhancements
 - Real-time demand prediction
-- Weather API integration
-- Interactive dashboard using Power BI
-- Route optimization integration
-- Deployment using FastAPI
+- Integrate real-time shipment data for live demand forecasting.
+- Add weather and holiday information to improve predictions.
+- Develop a dashboard to visualize demand trends.
+- Deploy the model as a web application using FastAPI.
+- Support hub-wise and region-wise demand prediction.
+- Enable automatic fleet and warehouse resource planning.
+  
