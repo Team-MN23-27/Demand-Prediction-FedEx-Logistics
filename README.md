@@ -26,8 +26,6 @@ Logistics companies experience fluctuating shipment volumes due to seasonal tren
 ## Dataset
 The dataset contains historical shipment records with features such as:
 - Date
-- Region
-- Hub
 - Shipment Volume / Demand
 - Vehicle Type
 - Holiday Indicator
