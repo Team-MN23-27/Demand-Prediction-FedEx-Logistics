@@ -1,6 +1,6 @@
 ## Team Members : 
-##                Mathan
-##                Mohammed Fazil
+##                K.Mathan
+##                M.Mohammed Fazil
 ##                A.Muthulakshmi
 ##                S.Nesha
 ##                Rajasarathi
