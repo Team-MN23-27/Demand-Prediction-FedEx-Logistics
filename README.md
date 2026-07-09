@@ -45,7 +45,7 @@ The following preprocessing steps were performed:
 - Saved the cleaned dataset.
 
 ## Machine Learning Model
-Algorithm Used : XGBoost Regressor
+Algorithm Used : LightGBM
 
 ## Features Used
 Date
@@ -77,7 +77,6 @@ Load_Count
 - Pandas
 - NumPy
 - Scikit-learn
-- XGBoost
 - Matplotlib
 - Jupyter Notebook / VS Code
 
