@@ -91,29 +91,44 @@ Load_Count
 
 ## Project Structure
 
-
-Demand-Prediction/
+Demand-Prediction-Project/
 │
 ├── data/
-│   ├── shipment_demand_dataset.xlsx
-│   └── cleaned_shipment_demand_dataset.csv
-│
-├── src/
-│   ├── preprocess.py
-│   └── xgboost_model.py
+│   ├── shipment_demand_dataset.xlsx          
+│   └── cleaned_shipment_demand_dataset.csv   
 │
 ├── models/
-│   └── xgboost_model.pkl
+│   ├── lightgbm_model.pkl                    
+│   └── features.pkl                          
+│
+├── src/
+│   ├── preprocess.py                         # Data Cleaning
+│   ├── train_lightgbm.py                     # Model Training
+│   ├── predict.py                            # Prediction Script (Optional)
+│   └── app.py                                # Flask API
+│
+├── templates/
+│   └── index.html                            # Flask Frontend (Optional)
+│
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   └── images/
+│       └── fedex_logo.png
 │
 ├── results/
+│   ├── evaluation_metrics.txt
 │   ├── prediction_results.csv
-│   └── model_metrics.txt
+│   └── feature_importance.png
 │
-├── README.md
-├── requirements.txt
-└── .gitignore
+├── notebooks/
+│   └── Demand_Prediction.ipynb
+│
+├── requirements.txt                          
+├── README.md                                 
+├── .gitignore                                
 
-
+                                 
 ## Future Enhancements
 - Real-time demand prediction
 - Integrate real-time shipment data for live demand forecasting.
