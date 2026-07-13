@@ -63,7 +63,7 @@ Total_Revenue
 Load_Count
 
 ## Target Variable
-  Shipment_Volume
+  Ordercount
 
 ## Evaluation Metrics
 - Mean Absolute Error (MAE)
