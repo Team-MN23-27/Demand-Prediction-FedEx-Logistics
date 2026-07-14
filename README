@@ -1,0 +1,178 @@
+# 🚚 Demand Prediction in FedEx Logistics Using Historical Data
+
+Team Members
+
+* K. Mathan
+* M. Mohammed Fazil
+* A. Muthulakshmi
+* S. Nesha
+* Rajasarathi
+
+**Department:** B.Tech Artificial Intelligence and Data Science
+**Institution:** E.G.S. Pillay Engineering College
+
+
+## 📌 Project Overview
+
+This project predicts future shipment demand using historical logistics data. The system helps logistics companies like FedEx forecast shipment volumes in advance, enabling efficient fleet allocation, warehouse capacity planning, and staffing decisions. By analyzing historical shipment patterns, seasonal trends, and holiday effects, the system provides accurate demand predictions that help reduce operational costs and improve logistics efficiency.
+
+---
+
+## ❗ Problem Statement
+
+Logistics companies experience significant fluctuations in shipment demand due to seasonal trends, holidays, promotional sales, and regional demand variations. Traditional forecasting methods based on historical averages often fail to capture these dynamic changes, leading to inefficient resource utilization, delivery delays, and increased operational costs.
+
+---
+
+## 🎯 Objectives
+
+* Predict future shipment demand using historical data.
+* Improve warehouse resource planning.
+* Optimize fleet allocation.
+* Reduce delivery delays.
+* Support data-driven decision making.
+
+---
+
+## 📂 Dataset
+
+The project uses a historical shipment demand dataset containing shipment information, revenue details, hub locations, and time-based features.
+
+### Dataset Columns
+
+* Date
+* Hub
+* Region
+* OrderCount
+* NumberOfPieces
+* TotalRevenue
+* Holiday_Indicator_Encoded
+* Festival_Name_Encoded
+* Season_Encoded
+* Year
+* Month
+* Day
+* DayOfWeek
+* WeekOfYear
+* IsWeekend
+* Quarter
+* OrderCount_lag_1
+* OrderCount_lag_7
+* OrderCount_lag_14
+* OrderCount_rolling_mean_7
+* OrderCount_rolling_std_7
+
+---
+
+## 🧹 Data Preprocessing
+
+* Removed duplicate records.
+* Handled missing values.
+* Converted the Date column into datetime format.
+* Encoded holiday, festival, and season information.
+* Extracted date-based features.
+* Generated lag and rolling features.
+* Applied StandardScaler to lag and rolling features.
+* Saved the preprocessed dataset for model training.
+
+---
+
+## 🤖 Machine Learning Model
+
+**Algorithm Used:** LightGBM
+
+---
+
+## 🎯 Target Variable
+
+**OrderCount (Shipment Demand)**
+
+---
+
+## 📊 Evaluation Metrics
+
+* Mean Absolute Error (MAE)
+* Root Mean Squared Error (RMSE)
+* R² Score
+
+---
+
+## 🛠️ Technologies Used
+
+* Python
+* Pandas
+* NumPy
+* Scikit-learn
+* LightGBM
+* Matplotlib
+* Joblib
+* Jupyter Notebook
+* VS Code
+
+---
+
+## 🔄 Project Workflow
+
+1. Load Dataset
+2. Data Cleaning
+3. Feature Engineering
+4. Data Preprocessing
+5. Train-Test Split
+6. Model Training
+7. Model Evaluation
+8. Demand Prediction
+9. Result Visualization
+
+---
+
+## 📁 Project Structure
+
+```text
+Demand-Prediction-Project/
+│
+├── data/
+│   ├── shipment_demand_dataset.xlsx
+│   └── cleaned_shipment_demand_dataset.csv
+│
+├── models/
+│   ├── lightgbm_model.pkl
+│   ├── lag_feature_scaler.pkl
+│   └── features.pkl
+│
+├── src/
+│   ├── preprocess.py
+│   ├── train_lightgbm.py
+│   ├── predict.py
+│   └── app.py
+│
+├── templates/
+│   └── index.html
+│
+├── static/
+│   ├── css/
+│   └── images/
+│
+├── results/
+│   ├── evaluation_metrics.txt
+│   ├── prediction_results.csv
+│   └── feature_importance.png
+│
+├── notebooks/
+│   └── Demand_Prediction.ipynb
+│
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
+---
+
+## 🚀 Future Enhancements
+
+* Integrate real-time shipment data.
+* Improve prediction accuracy using advanced models.
+* Include weather and traffic information.
+* Develop an interactive dashboard.
+* Deploy the model using FastAPI.
+* Support hub-wise and region-wise demand forecasting.
+* Enable automated fleet and warehouse resource planning.
