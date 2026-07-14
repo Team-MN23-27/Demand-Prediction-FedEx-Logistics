@@ -3,9 +3,9 @@ import numpy as np
 import xgboost as xgb
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# ==========================================
+
 # 1. DATA LOAD & SORTING
-# ==========================================
+
 file_path = r'/content/preprocessed_demand_data.csv'
 df = pd.read_csv(file_path)
 
@@ -13,9 +13,9 @@ df = pd.read_csv(file_path)
 df['Date'] = pd.to_datetime(df['Date'])
 df = df.sort_values('Date').reset_index(drop=True)
 
-# ==========================================
+
 # 2. FEATURE SELECTION
-# ==========================================
+
 target = 'OrderCount'
 
 # Data Leakage thaduka 'NumberOfPieces' and 'TotalRevenue'-ah thookiyachu!
@@ -37,17 +37,17 @@ all_features = features + categorical_features
 X = df[all_features]
 y = df[target]
 
-# ==========================================
+
 # 3. TIME-SERIES TRAIN & TEST SPLIT
-# ==========================================
+
 split_idx = int(len(df) * 0.8)
 
 X_train, X_test = X.iloc[:split_idx], X.iloc[split_idx:]
 y_train, y_test = y.iloc[:split_idx], y.iloc[split_idx:]
 
-# ==========================================
+
 # 4. XGBoost MODEL TRAINING
-# ==========================================
+
 print("Training XGBoost model...")
 
 # Regressor object initialisation
@@ -71,9 +71,9 @@ model.fit(
     verbose=100
 )
 
-# ==========================================
+
 # 5. PREDICTION & EVALUATION
-# ==========================================
+
 y_pred = model.predict(X_test)
 
 rmse = np.sqrt(mean_squared_error(y_test, y_pred))
@@ -85,9 +85,9 @@ print(f"RMSE: {rmse:.4f}")
 print(f"MAE: {mae:.4f}")
 print(f"R2 Score: {r2:.4f}")
 
-# ==========================================
+
 # 6. FEATURE IMPORTANCE
-# ==========================================
+
 importance = pd.DataFrame({
     'Feature': all_features,
     'Importance': model.feature_importances_
