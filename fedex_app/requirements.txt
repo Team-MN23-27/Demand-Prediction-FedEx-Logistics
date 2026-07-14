@@ -1,0 +1,5 @@
+flask
+lightgbm
+pandas
+numpy
+pyngrok
