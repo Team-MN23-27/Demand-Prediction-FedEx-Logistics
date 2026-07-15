@@ -6,54 +6,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #f4f6f9; }
-        .navbar-brand { font-weight: 700; color: #4d148c !important; }
-        .card { border: none; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .btn-fedex { background: #ff6200; border: none; color: #fff; font-weight: 600; }
-        .btn-fedex:hover { background: #e65800; color: #fff; }
-        .result-box { background: linear-gradient(135deg, #4d148c, #6a1fb1); color: #fff; border-radius: 14px; }
-        .stat-card { border-radius: 12px; padding: 20px; text-align: center; background: #fff; }
-        .stat-number { font-size: 2rem; font-weight: 700; color: #4d148c; }
-        .stat-label { color: #777; font-size: 0.9rem; }
+        :root {
+            --fedex-purple: #4d148c;
+            --fedex-purple-light: #6a1fb1;
+            --fedex-orange: #ff6200;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+            background-image:
+                linear-gradient(rgba(244,246,249,0.72), rgba(244,246,249,0.72)),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='180' viewBox='0 0 220 180'%3E%3Cg fill='none' stroke='%234d148c' stroke-width='2.5' opacity='0.6'%3E%3Crect x='10' y='90' width='55' height='32' rx='3'/%3E%3Crect x='65' y='100' width='28' height='22' rx='2'/%3E%3Ccircle cx='28' cy='126' r='7'/%3E%3Ccircle cx='80' cy='126' r='7'/%3E%3Cline x1='18' y1='100' x2='55' y2='100'/%3E%3Crect x='120' y='30' width='24' height='24' rx='2' stroke='%23ff6200'/%3E%3Cline x1='120' y1='42' x2='144' y2='42' stroke='%23ff6200'/%3E%3Cline x1='132' y1='30' x2='132' y2='54' stroke='%23ff6200'/%3E%3Crect x='155' y='55' width='18' height='18' rx='2' stroke='%23ff6200'/%3E%3Cpath d='M100 140 Q 140 120 180 140 T 220 130' stroke-dasharray='4,5' stroke='%234d148c'/%3E%3Ccircle cx='190' cy='75' r='9'/%3E%3Cpath d='M190 84 L190 100'/%3E%3C/g%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 220px 180px;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        .hero {
+            background: linear-gradient(120deg, var(--fedex-purple) 0%, var(--fedex-purple-light) 55%, #8b3fd6 100%);
+            color: #fff;
+            padding: 42px 0 56px 0;
+            margin-bottom: -34px;
+            box-shadow: 0 8px 30px rgba(77,20,140,0.25);
+        }
+        .hero h1 { font-weight: 800; font-size: 1.9rem; letter-spacing: -0.5px; }
+        .hero p { opacity: 0.85; font-size: 0.95rem; margin-bottom: 0; }
+        .hero .brand-icon {
+            width: 54px; height: 54px; border-radius: 14px;
+            background: rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; margin-right: 14px;
+        }
+        .card { border: none; border-radius: 16px; box-shadow: 0 6px 24px rgba(24,10,46,0.09); }
+        .form-label { font-weight: 600; font-size: 0.85rem; color: #4a4a4a; }
+        .form-control, .form-select {
+            border-radius: 10px; border: 1.5px solid #e3e3ec; padding: 10px 14px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--fedex-purple-light);
+            box-shadow: 0 0 0 3px rgba(106,31,177,0.12);
+        }
+        .btn-fedex {
+            background: linear-gradient(135deg, var(--fedex-orange), #ff8534);
+            border: none; color: #fff; font-weight: 700; border-radius: 10px;
+            letter-spacing: 0.3px; box-shadow: 0 6px 16px rgba(255,98,0,0.35);
+            transition: transform 0.15s ease;
+        }
+        .btn-fedex:hover { background: linear-gradient(135deg, #e65800, #ff6e1a); color: #fff; transform: translateY(-1px); }
+        .result-box { background: linear-gradient(135deg, var(--fedex-purple), #7a2fc9); color: #fff; border-radius: 16px; }
+        .stat-card {
+            border-radius: 14px; padding: 22px 16px; text-align: center; background: #fff;
+            border-top: 4px solid var(--fedex-orange);
+        }
+        .stat-card.purple-accent { border-top-color: var(--fedex-purple); }
+        .stat-number { font-size: 2.1rem; font-weight: 800; color: var(--fedex-purple); }
+        .stat-label { color: #888; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+        .section-title { font-weight: 700; color: var(--fedex-purple); }
+        .badge-hub { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 14px; font-size: 0.8rem; }
+        .table thead { background: #f8f6fc; }
+        .table thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.3px; color: var(--fedex-purple); border: none; }
+        .table td { font-size: 0.9rem; vertical-align: middle; }
+        footer { color: #999; font-size: 0.82rem; padding: 24px 0; text-align: center; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-light bg-white shadow-sm mb-4">
-    <div class="container">
-        <span class="navbar-brand"><i class="fa-solid fa-truck-fast"></i> FedEx Demand Prediction</span>
+<div class="hero">
+    <div class="container d-flex align-items-center">
+        <div class="brand-icon"><i class="fa-solid fa-truck-fast"></i></div>
+        <div>
+            <h1 class="mb-0">FedEx Demand Prediction</h1>
+            <p>AI-powered shipment forecasting &amp; workforce planning</p>
+        </div>
     </div>
-</nav>
+</div>
 
-<div class="container">
+<div class="container" style="padding-top: 50px;">
     <div class="row justify-content-center">
-        <div class="col-lg-6">
+        <div class="col-lg-7">
+
             <div class="card p-4 mb-4">
-                <h5 class="mb-3"><i class="fa-solid fa-calendar-days text-danger"></i> Predict Shipment Demand</h5>
+                <h5 class="section-title mb-3"><i class="fa-solid fa-calendar-days"></i> Predict Shipment Demand</h5>
 
                 {% if error %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endif %}
 
                 <form action="/predict" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Date</label>
-                        <input type="date" name="date" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Hub</label>
-                        <select name="hub" class="form-select" required>
-                            <option value="" disabled selected>Select a hub</option>
-                            {% for hub in hubs %}
-                            <option value="{{ hub }}" {% if result and result.hub==hub %}selected{% endif %}>{{ hub.replace('_', ' ') }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Hub</label>
+                            <select name="hub" class="form-select" required>
+                                <option value="" disabled selected>Select a hub</option>
+                                {% for hub in hubs %}
+                                <option value="{{ hub }}" {% if result and result.hub==hub %}selected{% endif %}>{{ hub.replace('_', ' ') }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
 
                     <hr>
-                    <p class="text-muted mb-2" style="font-size:0.9rem;">
-                        <i class="fa-solid fa-warehouse"></i> Optional: Ippo un hub-la evlo workers/vehicles available irukku nu podunga, shortage irundha suggestion tharom.
+                    <p class="text-muted mb-2" style="font-size:0.85rem;">
+                        <i class="fa-solid fa-warehouse"></i> Optional: Enter how many workers/vehicles are currently available at this hub, and we'll flag any shortage.
                     </p>
                     <div class="row">
                         <div class="col-6 mb-3">
@@ -68,17 +128,23 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-fedex w-100 py-2">
-                        <i class="fa-solid fa-magnifying-glass-chart"></i> Predict Demand
+                    <button type="submit" class="btn btn-fedex w-100 py-2 mt-2">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>&nbsp; Predict Demand
                     </button>
                 </form>
             </div>
 
             {% if result %}
             <div class="card result-box p-4 mb-4">
-                <h5><i class="fa-solid fa-chart-line"></i> Prediction Result</h5>
-                <p class="mb-1">Date: <strong>{{ result.date }}</strong></p>
-                <p class="mb-0">Hub: <strong>{{ result.hub.replace('_',' ') }}</strong> ({{ result.region }} Region)</p>
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <h5 class="mb-1"><i class="fa-solid fa-chart-line"></i> Prediction Result</h5>
+                        <p class="mb-0" style="opacity:0.9;">{{ result.date }} &nbsp;•&nbsp; {{ result.hub.replace('_',' ') }} ({{ result.region }} Region)</p>
+                    </div>
+                    {% if result.is_high_demand %}
+                    <span class="badge-hub"><i class="fa-solid fa-triangle-exclamation"></i> High Demand</span>
+                    {% endif %}
+                </div>
             </div>
 
             <div class="row g-3 mb-4">
@@ -89,13 +155,13 @@
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="stat-card">
+                    <div class="stat-card purple-accent">
                         <div class="stat-number">{{ result.workers }}</div>
                         <div class="stat-label"><i class="fa-solid fa-people-group"></i> Workers Needed</div>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="stat-card">
+                    <div class="stat-card purple-accent">
                         <div class="stat-number">{{ result.vehicles }}</div>
                         <div class="stat-label"><i class="fa-solid fa-truck"></i> Vehicles Needed</div>
                     </div>
@@ -104,7 +170,7 @@
 
             {% if result.worker_gap or result.vehicle_gap %}
             <div class="card p-4 mb-4">
-                <h6 class="mb-3"><i class="fa-solid fa-scale-balanced text-danger"></i> Availability Check</h6>
+                <h6 class="section-title mb-3"><i class="fa-solid fa-scale-balanced"></i> Availability Check</h6>
 
                 {% if result.worker_gap %}
                 <div class="alert {% if result.worker_gap.status=='shortage' %}alert-danger{% elif result.worker_gap.status=='surplus' %}alert-success{% else %}alert-secondary{% endif %} mb-2">
@@ -124,18 +190,16 @@
             </div>
             {% endif %}
 
-            {% if result.is_high_demand and result.staff_list %}
             <div class="card p-4 mb-4">
-                <h6 class="mb-2"><i class="fa-solid fa-triangle-exclamation text-warning"></i> High Demand Alert!</h6>
-                <p class="text-muted" style="font-size:0.9rem;">
-                    Predicted demand ({{ result.demand }}) hub average-ah ({{ result.staff_list.hub_avg }}) vida jaasti irukku.
-                    Ithe hub-la irukura <strong>available</strong> staff contacts:
-                </p>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="section-title mb-0"><i class="fa-solid fa-address-book"></i> Nearby Available Staff</h6>
+                    <span class="text-muted" style="font-size:0.78rem;">Hub avg: {{ result.staff_list.hub_avg }} orders/day</span>
+                </div>
 
-                <h6 class="mt-3"><i class="fa-solid fa-people-group text-danger"></i> Available Workers</h6>
+                <h6 class="mt-3 mb-2" style="font-size:0.9rem;"><i class="fa-solid fa-people-group text-danger"></i> Available Workers</h6>
                 {% if result.staff_list.workers %}
                 <div class="table-responsive">
-                    <table class="table table-sm table-striped">
+                    <table class="table table-sm table-hover">
                         <thead><tr><th>Name</th><th>Phone</th><th>Shift</th></tr></thead>
                         <tbody>
                         {% for w in result.staff_list.workers %}
@@ -149,13 +213,13 @@
                     </table>
                 </div>
                 {% else %}
-                <p class="text-danger" style="font-size:0.9rem;">No available workers ippo indha hub-la!</p>
+                <p class="text-danger" style="font-size:0.9rem;">No available workers at this hub right now!</p>
                 {% endif %}
 
-                <h6 class="mt-3"><i class="fa-solid fa-truck text-danger"></i> Available Vehicles</h6>
+                <h6 class="mt-3 mb-2" style="font-size:0.9rem;"><i class="fa-solid fa-truck text-danger"></i> Available Vehicles</h6>
                 {% if result.staff_list.vehicles %}
                 <div class="table-responsive">
-                    <table class="table table-sm table-striped">
+                    <table class="table table-sm table-hover">
                         <thead><tr><th>Driver</th><th>Phone</th><th>Vehicle Type</th></tr></thead>
                         <tbody>
                         {% for v in result.staff_list.vehicles %}
@@ -169,18 +233,22 @@
                     </table>
                 </div>
                 {% else %}
-                <p class="text-danger" style="font-size:0.9rem;">No available vehicles ippo indha hub-la!</p>
+                <p class="text-danger" style="font-size:0.9rem;">No available vehicles at this hub right now!</p>
                 {% endif %}
 
-                <p class="text-muted mt-2" style="font-size:0.8rem;">
-                    <i class="fa-solid fa-circle-info"></i> Note: Idhu sample/demo data - real staff records illa.
+                <p class="text-muted mt-2 mb-0" style="font-size:0.78rem;">
+                    <i class="fa-solid fa-circle-info"></i> Sample/demo data — not real staff records.
                 </p>
             </div>
             {% endif %}
-            {% endif %}
+
         </div>
     </div>
 </div>
+
+<footer>
+    <i class="fa-solid fa-truck-fast"></i> FedEx Shipment Demand Prediction &nbsp;•&nbsp; LightGBM-powered forecasting
+</footer>
 
 </body>
 </html>
