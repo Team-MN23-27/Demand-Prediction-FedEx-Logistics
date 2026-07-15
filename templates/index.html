@@ -7,6 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         :root {
             --fedex-purple: #4d148c;
@@ -30,7 +31,14 @@
             padding: 42px 0 56px 0;
             margin-bottom: -34px;
             box-shadow: 0 8px 30px rgba(77,20,140,0.25);
+            position: relative;
+            overflow: hidden;
         }
+        .hero-illustration {
+            position: absolute; right: 0px; top: 50%; transform: translateY(-50%);
+            width: 240px; opacity: 0.95; pointer-events: none;
+        }
+        @media (max-width: 991px) { .hero-illustration { display: none; } }
         .hero h1 { font-weight: 800; font-size: 1.9rem; letter-spacing: -0.5px; }
         .hero p { opacity: 0.85; font-size: 0.95rem; margin-bottom: 0; }
         .hero .brand-icon {
@@ -82,10 +90,42 @@
                 <p>AI-powered shipment forecasting &amp; workforce planning</p>
             </div>
         </div>
-        <a href="/bookings" class="btn btn-light btn-sm mt-2" style="border-radius: 10px; font-weight:600;">
-            <i class="fa-solid fa-calendar-check"></i> View Bookings
-        </a>
+        <div class="d-flex align-items-center gap-2 mt-2">
+            <span class="badge-hub"><i class="fa-solid fa-user"></i> {{ session.full_name }}</span>
+            <a href="/bookings" class="btn btn-light btn-sm" style="border-radius: 10px; font-weight:600;">
+                <i class="fa-solid fa-calendar-check"></i> View Bookings
+            </a>
+            <a href="/logout" class="btn btn-outline-light btn-sm" style="border-radius: 10px; font-weight:600;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
     </div>
+
+    <svg class="hero-illustration" viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="130" cy="140" rx="110" ry="8" fill="rgba(0,0,0,0.15)"/>
+        <g>
+            <rect x="10" y="70" width="42" height="42" rx="4" fill="#ffffff" opacity="0.95"/>
+            <line x1="10" y1="91" x2="52" y2="91" stroke="#ff6200" stroke-width="3"/>
+            <line x1="31" y1="70" x2="31" y2="112" stroke="#ff6200" stroke-width="3"/>
+            <rect x="18" y="42" width="30" height="30" rx="3" fill="#ffe8d6" opacity="0.95"/>
+            <line x1="18" y1="57" x2="48" y2="57" stroke="#ff6200" stroke-width="2"/>
+            <line x1="33" y1="42" x2="33" y2="72" stroke="#ff6200" stroke-width="2"/>
+        </g>
+        <g>
+            <rect x="60" y="55" width="130" height="60" rx="6" fill="#ffffff"/>
+            <path d="M190 70 h32 l14 20 v25 h-46 z" fill="#ffffff"/>
+            <rect x="200" y="78" width="20" height="16" rx="2" fill="#4d148c" opacity="0.5"/>
+            <rect x="60" y="95" width="130" height="10" fill="#4d148c"/>
+            <rect x="190" y="98" width="46" height="7" fill="#4d148c"/>
+            <rect x="205" y="72" width="12" height="14" rx="2" fill="#c9b8ea"/>
+            <circle cx="95" cy="118" r="13" fill="#2b2b2b"/>
+            <circle cx="95" cy="118" r="5" fill="#cfcfcf"/>
+            <circle cx="205" cy="118" r="13" fill="#2b2b2b"/>
+            <circle cx="205" cy="118" r="5" fill="#cfcfcf"/>
+        </g>
+        <line x1="0" y1="60" x2="20" y2="60" stroke="#ffffff" stroke-width="3" opacity="0.5"/>
+        <line x1="0" y1="75" x2="14" y2="75" stroke="#ffffff" stroke-width="3" opacity="0.35"/>
+    </svg>
 </div>
 
 <div class="container" style="padding-top: 50px;">
@@ -149,6 +189,11 @@
                 </form>
             </div>
 
+            <div class="card p-4 mb-4">
+                <h6 class="section-title mb-3"><i class="fa-solid fa-chart-simple"></i> Average Demand by Hub</h6>
+                <canvas id="hubAvgChart" height="140"></canvas>
+            </div>
+
             {% if result %}
             <div class="card result-box p-4 mb-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -181,6 +226,11 @@
                         <div class="stat-label"><i class="fa-solid fa-truck"></i> Vehicles Needed</div>
                     </div>
                 </div>
+            </div>
+
+            <div class="card p-4 mb-4">
+                <h6 class="section-title mb-3"><i class="fa-solid fa-arrow-trend-up"></i> 14-Day Demand Trend — {{ result.hub.replace('_',' ') }}</h6>
+                <canvas id="trendChart" height="130"></canvas>
             </div>
 
             {% if result.worker_gap or result.vehicle_gap %}
@@ -290,5 +340,62 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+// Bar chart - average demand across all hubs (always shown)
+const hubAvgData = {{ hub_avg_chart | tojson }};
+new Chart(document.getElementById('hubAvgChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(hubAvgData),
+        datasets: [{
+            label: 'Avg Orders/Day',
+            data: Object.values(hubAvgData),
+            backgroundColor: '#6a1fb1',
+            borderRadius: 6,
+            maxBarThickness: 46
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#f0eef7' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+{% if result and trend %}
+// Line chart - 14 day trend + predicted point highlighted
+const trendData = {{ trend | tojson }};
+const trendLabels = trendData.map(d => d.date).concat(['{{ result.date }}']);
+const trendValues = trendData.map(d => d.demand).concat([{{ result.demand }}]);
+const pointColors = trendData.map(() => '#4d148c').concat(['#ff6200']);
+const pointRadii = trendData.map(() => 3).concat([7]);
+
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: trendLabels,
+        datasets: [{
+            label: 'Orders',
+            data: trendValues,
+            borderColor: '#6a1fb1',
+            backgroundColor: 'rgba(106,31,177,0.08)',
+            tension: 0.35,
+            fill: true,
+            pointBackgroundColor: pointColors,
+            pointRadius: pointRadii
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: false, grid: { color: '#f0eef7' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+{% endif %}
+</script>
 </body>
 </html>
