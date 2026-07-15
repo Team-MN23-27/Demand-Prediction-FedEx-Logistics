@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bookings - FedEx Demand Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fedex-purple: #4d148c;
+            --fedex-purple-light: #6a1fb1;
+            --fedex-orange: #ff6200;
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f6f9; min-height: 100vh; }
+        .hero {
+            background: linear-gradient(120deg, var(--fedex-purple) 0%, var(--fedex-purple-light) 55%, #8b3fd6 100%);
+            color: #fff; padding: 42px 0 56px 0; margin-bottom: -34px;
+            box-shadow: 0 8px 30px rgba(77,20,140,0.25);
+        }
+        .hero h1 { font-weight: 800; font-size: 1.9rem; letter-spacing: -0.5px; }
+        .hero .brand-icon {
+            width: 54px; height: 54px; border-radius: 14px; background: rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-right: 14px;
+        }
+        .card { border: none; border-radius: 16px; box-shadow: 0 6px 24px rgba(24,10,46,0.09); }
+        .section-title { font-weight: 700; color: var(--fedex-purple); }
+        .table thead { background: #f8f6fc; }
+        .table thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.3px; color: var(--fedex-purple); border: none; }
+        .table td { font-size: 0.9rem; vertical-align: middle; }
+        .status-pill { border-radius: 20px; padding: 3px 12px; font-size: 0.75rem; font-weight: 600; background: #e9f9ee; color: #1a8a3e; }
+        .type-pill { border-radius: 20px; padding: 3px 12px; font-size: 0.75rem; font-weight: 600; }
+        .type-worker { background: #eef1ff; color: var(--fedex-purple); }
+        .type-vehicle { background: #fff2e6; color: var(--fedex-orange); }
+        .form-select, .form-control { border-radius: 10px; }
+        footer { color: #999; font-size: 0.82rem; padding: 24px 0; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center">
+            <div class="brand-icon"><i class="fa-solid fa-calendar-check"></i></div>
+            <div>
+                <h1 class="mb-0">Bookings</h1>
+                <p style="opacity:0.85; margin-bottom:0;">Workers &amp; vehicles booked across hubs</p>
+            </div>
+        </div>
+        <a href="/" class="btn btn-light btn-sm mt-2" style="border-radius: 10px; font-weight:600;">
+            <i class="fa-solid fa-arrow-left"></i> Back to Prediction
+        </a>
+    </div>
+</div>
+
+<div class="container" style="padding-top: 50px;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category=='danger' else ('success' if category=='success' else 'info') }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card p-4 mb-4">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" style="font-weight:600; font-size:0.85rem;">Filter by Hub</label>
+                <select name="hub" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Hubs</option>
+                    {% for hub in hubs %}
+                    <option value="{{ hub }}" {% if hub_filter==hub %}selected{% endif %}>{{ hub.replace('_',' ') }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <div class="card p-4 mb-4">
+        <h6 class="section-title mb-3"><i class="fa-solid fa-list"></i> Active Bookings ({{ bookings|length }})</h6>
+
+        {% if bookings %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Type</th><th>Name</th><th>Phone</th><th>Hub</th>
+                        <th>From</th><th>To</th><th>Booked By</th><th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for b in bookings %}
+                    <tr>
+                        <td><span class="type-pill {{ 'type-worker' if b.ResourceType=='worker' else 'type-vehicle' }}">
+                            <i class="fa-solid {{ 'fa-user' if b.ResourceType=='worker' else 'fa-truck' }}"></i> {{ b.ResourceType|capitalize }}
+                        </span></td>
+                        <td>{{ b.ResourceName }}</td>
+                        <td>{{ b.ResourcePhone }}</td>
+                        <td>{{ b.Hub.replace('_',' ') }}</td>
+                        <td>{{ b.DateFrom }}</td>
+                        <td>{{ b.DateTo }}</td>
+                        <td>{{ b.BookedBy }}</td>
+                        <td>
+                            <form action="/bookings/cancel/{{ b.BookingID }}" method="POST">
+                                <input type="hidden" name="hub" value="{{ hub_filter }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:8px; font-size:0.78rem;">
+                                    <i class="fa-solid fa-xmark"></i> Cancel
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No active bookings{% if hub_filter %} for {{ hub_filter.replace('_',' ') }}{% endif %} yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<footer>
+    <i class="fa-solid fa-truck-fast"></i> FedEx Shipment Demand Prediction &nbsp;•&nbsp; Booking Management
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

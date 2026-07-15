@@ -74,16 +74,31 @@
 <body>
 
 <div class="hero">
-    <div class="container d-flex align-items-center">
-        <div class="brand-icon"><i class="fa-solid fa-truck-fast"></i></div>
-        <div>
-            <h1 class="mb-0">FedEx Demand Prediction</h1>
-            <p>AI-powered shipment forecasting &amp; workforce planning</p>
+    <div class="container d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center">
+            <div class="brand-icon"><i class="fa-solid fa-truck-fast"></i></div>
+            <div>
+                <h1 class="mb-0">FedEx Demand Prediction</h1>
+                <p>AI-powered shipment forecasting &amp; workforce planning</p>
+            </div>
         </div>
+        <a href="/bookings" class="btn btn-light btn-sm mt-2" style="border-radius: 10px; font-weight:600;">
+            <i class="fa-solid fa-calendar-check"></i> View Bookings
+        </a>
     </div>
 </div>
 
 <div class="container" style="padding-top: 50px;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category=='danger' else ('success' if category=='success' else 'info') }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div class="row justify-content-center">
         <div class="col-lg-7">
 
@@ -200,13 +215,25 @@
                 {% if result.staff_list.workers %}
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
-                        <thead><tr><th>Name</th><th>Phone</th><th>Shift</th></tr></thead>
+                        <thead><tr><th>Name</th><th>Phone</th><th>Shift</th><th></th></tr></thead>
                         <tbody>
                         {% for w in result.staff_list.workers %}
                             <tr>
                                 <td>{{ w.Name }}</td>
                                 <td>{{ w.Phone }}</td>
                                 <td>{{ w.ShiftStart }} - {{ w.ShiftEnd }}</td>
+                                <td>
+                                    <form action="/book" method="POST" class="d-flex gap-1">
+                                        <input type="hidden" name="resource_type" value="worker">
+                                        <input type="hidden" name="resource_id" value="{{ w.WorkerID }}">
+                                        <input type="hidden" name="hub" value="{{ result.hub }}">
+                                        <input type="hidden" name="date_from" value="{{ result.date }}">
+                                        <input type="hidden" name="date_to" value="{{ result.date }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" style="border-radius:8px; font-size:0.78rem;">
+                                            <i class="fa-solid fa-calendar-plus"></i> Book
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -220,13 +247,25 @@
                 {% if result.staff_list.vehicles %}
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
-                        <thead><tr><th>Driver</th><th>Phone</th><th>Vehicle Type</th></tr></thead>
+                        <thead><tr><th>Driver</th><th>Phone</th><th>Vehicle Type</th><th></th></tr></thead>
                         <tbody>
                         {% for v in result.staff_list.vehicles %}
                             <tr>
                                 <td>{{ v.DriverName }}</td>
                                 <td>{{ v.Phone }}</td>
                                 <td>{{ v.VehicleType }}</td>
+                                <td>
+                                    <form action="/book" method="POST" class="d-flex gap-1">
+                                        <input type="hidden" name="resource_type" value="vehicle">
+                                        <input type="hidden" name="resource_id" value="{{ v.VehicleID }}">
+                                        <input type="hidden" name="hub" value="{{ result.hub }}">
+                                        <input type="hidden" name="date_from" value="{{ result.date }}">
+                                        <input type="hidden" name="date_to" value="{{ result.date }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" style="border-radius:8px; font-size:0.78rem;">
+                                            <i class="fa-solid fa-calendar-plus"></i> Book
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -250,5 +289,6 @@
     <i class="fa-solid fa-truck-fast"></i> FedEx Shipment Demand Prediction &nbsp;•&nbsp; LightGBM-powered forecasting
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

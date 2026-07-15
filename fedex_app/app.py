@@ -5,15 +5,17 @@ Date + Hub kudutha, andha day-ku evlo demand (OrderCount) varum nu predict pannu
 Adha vachi evlo workers + delivery vehicles venum nu suggest pannum.
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 import pandas as pd
 import numpy as np
 import lightgbm as lgb
 from datetime import datetime, timedelta
 import math
 import os
+import sqlite3
 
 app = Flask(__name__)
+app.secret_key = "fedex-demand-app-secret-key"  # flash messages ku venum
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -22,6 +24,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ==========================================
 MODEL_PATH = os.path.join(BASE_DIR, "models", "lightgbm_model.txt")
 HIST_PATH = os.path.join(BASE_DIR, "data", "historical_orders.csv")
+DB_PATH = os.path.join(BASE_DIR, "data", "fedex_resources.db")
 
 model = lgb.Booster(model_file=MODEL_PATH)
 
@@ -34,11 +37,41 @@ LAST_DATE = hist_df["Date"].max()
 # Average demand per hub - "high demand" threshold-ku use pannrom
 HUB_AVG_DEMAND = hist_df.groupby("Hub")["OrderCount"].mean().to_dict()
 
-# Workers & Vehicles directory (SAMPLE/DEMO data - real staff data illa, project demo-ku mattum)
-WORKERS_PATH = os.path.join(BASE_DIR, "data", "workers_data.csv")
-VEHICLES_PATH = os.path.join(BASE_DIR, "data", "vehicles_data.csv")
-workers_df = pd.read_csv(WORKERS_PATH)
-vehicles_df = pd.read_csv(VEHICLES_PATH)
+
+def get_db():
+    """SQLite connection - workers, vehicles, bookings ella-thaiyum idhula than vachirukom."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db_if_needed():
+    """DB illama irundha, CSV files-la irundhu fresh-a build pannrom."""
+    if os.path.exists(DB_PATH):
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""CREATE TABLE workers (
+        WorkerID TEXT PRIMARY KEY, Name TEXT, Phone TEXT, Hub TEXT,
+        ShiftStart TEXT, ShiftEnd TEXT, BaseStatus TEXT)""")
+    cur.execute("""CREATE TABLE vehicles (
+        VehicleID TEXT PRIMARY KEY, VehicleType TEXT, DriverName TEXT, Phone TEXT,
+        Hub TEXT, BaseStatus TEXT)""")
+    cur.execute("""CREATE TABLE bookings (
+        BookingID INTEGER PRIMARY KEY AUTOINCREMENT, ResourceType TEXT NOT NULL,
+        ResourceID TEXT NOT NULL, Hub TEXT NOT NULL, DateFrom TEXT NOT NULL,
+        DateTo TEXT NOT NULL, Status TEXT NOT NULL DEFAULT 'active',
+        BookedBy TEXT, CreatedAt TEXT NOT NULL)""")
+    conn.commit()
+
+    workers_csv = pd.read_csv(os.path.join(BASE_DIR, "data", "workers_data.csv")).rename(columns={"Status": "BaseStatus"})
+    workers_csv.to_sql("workers", conn, if_exists="append", index=False)
+    vehicles_csv = pd.read_csv(os.path.join(BASE_DIR, "data", "vehicles_data.csv")).rename(columns={"Status": "BaseStatus"})
+    vehicles_csv.to_sql("vehicles", conn, if_exists="append", index=False)
+    conn.close()
+
+
+init_db_if_needed()
 
 # ==========================================
 # 2. FIXED MAPPINGS (from dataset analysis)
@@ -182,22 +215,41 @@ def predict_demand(hub, target_date):
     return pred
 
 
-def get_available_staff(hub, needed_workers=None, needed_vehicles=None):
+def get_available_staff(hub, target_date=None, needed_workers=None, needed_vehicles=None):
     """
-    Andha hub-la 'Available' status irukura workers/vehicles list pannrom.
-    needed_workers/vehicles kudutha, andha count varaikum mattum return pannrom
-    (illana ella available records-um return pannrom).
+    Andha hub-la 'Available' workers/vehicles list pannrom - SQLite-la irundhu.
+    target_date kudutha, andha date-ku already booked resources exclude pannrom.
     """
-    w = workers_df[(workers_df["Hub"] == hub) & (workers_df["Status"] == "Available")]
-    v = vehicles_df[(vehicles_df["Hub"] == hub) & (vehicles_df["Status"] == "Available")]
+    conn = get_db()
+
+    workers = conn.execute(
+        "SELECT * FROM workers WHERE Hub = ? AND BaseStatus = 'Available'", (hub,)
+    ).fetchall()
+    vehicles = conn.execute(
+        "SELECT * FROM vehicles WHERE Hub = ? AND BaseStatus = 'Available'", (hub,)
+    ).fetchall()
+
+    if target_date:
+        d = target_date.strftime("%Y-%m-%d") if hasattr(target_date, "strftime") else target_date
+        booked_workers = {r["ResourceID"] for r in conn.execute(
+            "SELECT ResourceID FROM bookings WHERE ResourceType='worker' AND Status='active' "
+            "AND DateFrom <= ? AND DateTo >= ?", (d, d)).fetchall()}
+        booked_vehicles = {r["ResourceID"] for r in conn.execute(
+            "SELECT ResourceID FROM bookings WHERE ResourceType='vehicle' AND Status='active' "
+            "AND DateFrom <= ? AND DateTo >= ?", (d, d)).fetchall()}
+        workers = [w for w in workers if w["WorkerID"] not in booked_workers]
+        vehicles = [v for v in vehicles if v["VehicleID"] not in booked_vehicles]
+
+    conn.close()
+
+    workers_list = [dict(w) for w in workers]
+    vehicles_list = [dict(v) for v in vehicles]
 
     if needed_workers is not None:
-        w = w.head(needed_workers)
+        workers_list = workers_list[:needed_workers]
     if needed_vehicles is not None:
-        v = v.head(needed_vehicles)
+        vehicles_list = vehicles_list[:needed_vehicles]
 
-    workers_list = w[["Name", "Phone", "ShiftStart", "ShiftEnd"]].to_dict("records")
-    vehicles_list = v[["DriverName", "Phone", "VehicleType"]].to_dict("records")
     return workers_list, vehicles_list
 
 
@@ -267,7 +319,8 @@ def predict():
         is_high_demand = predicted_demand > hub_avg
 
         # Staff list - EPPOVUM kaamikum (high demand irundhalum illanalum)
-        avail_workers_list, avail_vehicles_list = get_available_staff(hub)
+        # target_date pass panrom, andha date-ku already booked resources exclude aagum
+        avail_workers_list, avail_vehicles_list = get_available_staff(hub, target_date=target_date)
         staff_list = {
             "hub_avg": round(hub_avg, 1),
             "workers": avail_workers_list,
@@ -293,6 +346,86 @@ def predict():
     except Exception as e:
         return render_template("index.html", hubs=HUBS, result=None,
                                 error=f"Error: {str(e)}")
+
+
+@app.route("/book", methods=["POST"])
+def book_resource():
+    """Worker/Vehicle-ah oru date range-ku book pannrom."""
+    resource_type = request.form.get("resource_type")   # 'worker' or 'vehicle'
+    resource_id = request.form.get("resource_id")
+    hub = request.form.get("hub")
+    date_from = request.form.get("date_from")
+    date_to = request.form.get("date_to") or date_from
+    booked_by = request.form.get("booked_by", "").strip() or "Unknown"
+
+    if not all([resource_type, resource_id, hub, date_from]):
+        flash("Booking failed: missing required fields.", "danger")
+        return redirect(url_for("home"))
+
+    if date_to < date_from:
+        flash("Booking failed: 'Date To' cannot be before 'Date From'.", "danger")
+        return redirect(url_for("home"))
+
+    conn = get_db()
+    # Already booked-a irukka nu check pannrom (overlap check)
+    overlap = conn.execute(
+        "SELECT * FROM bookings WHERE ResourceType=? AND ResourceID=? AND Status='active' "
+        "AND DateFrom <= ? AND DateTo >= ?", (resource_type, resource_id, date_to, date_from)
+    ).fetchone()
+
+    if overlap:
+        flash(f"This {resource_type} is already booked for an overlapping date range!", "danger")
+    else:
+        conn.execute(
+            "INSERT INTO bookings (ResourceType, ResourceID, Hub, DateFrom, DateTo, Status, BookedBy, CreatedAt) "
+            "VALUES (?, ?, ?, ?, ?, 'active', ?, ?)",
+            (resource_type, resource_id, hub, date_from, date_to, booked_by, datetime.now().isoformat())
+        )
+        conn.commit()
+        flash(f"Booked successfully from {date_from} to {date_to}!", "success")
+    conn.close()
+
+    return redirect(url_for("view_bookings", hub=hub))
+
+
+@app.route("/bookings")
+def view_bookings():
+    """Ella active bookings-um kaamikum page - hub filter pannalam."""
+    hub_filter = request.args.get("hub", "")
+    conn = get_db()
+
+    query = """
+        SELECT b.BookingID, b.ResourceType, b.ResourceID, b.Hub, b.DateFrom, b.DateTo,
+               b.Status, b.BookedBy, b.CreatedAt,
+               COALESCE(w.Name, v.DriverName) as ResourceName,
+               COALESCE(w.Phone, v.Phone) as ResourcePhone
+        FROM bookings b
+        LEFT JOIN workers w ON b.ResourceType='worker' AND b.ResourceID = w.WorkerID
+        LEFT JOIN vehicles v ON b.ResourceType='vehicle' AND b.ResourceID = v.VehicleID
+        WHERE b.Status = 'active'
+    """
+    params = []
+    if hub_filter:
+        query += " AND b.Hub = ?"
+        params.append(hub_filter)
+    query += " ORDER BY b.DateFrom DESC"
+
+    bookings = [dict(r) for r in conn.execute(query, params).fetchall()]
+    conn.close()
+
+    return render_template("bookings.html", hubs=HUBS, bookings=bookings, hub_filter=hub_filter)
+
+
+@app.route("/bookings/cancel/<int:booking_id>", methods=["POST"])
+def cancel_booking(booking_id):
+    """Booking-ah cancel pannrom (undo) - Status 'cancelled' aaki vidrom."""
+    conn = get_db()
+    conn.execute("UPDATE bookings SET Status='cancelled' WHERE BookingID=?", (booking_id,))
+    conn.commit()
+    hub = request.form.get("hub", "")
+    conn.close()
+    flash("Booking cancelled.", "info")
+    return redirect(url_for("view_bookings", hub=hub))
 
 
 @app.route("/api/predict", methods=["POST"])
@@ -323,7 +456,7 @@ def api_predict():
         "is_high_demand": is_high_demand,
     }
 
-    avail_workers_list, avail_vehicles_list = get_available_staff(hub)
+    avail_workers_list, avail_vehicles_list = get_available_staff(hub, target_date=target_date)
     response["available_workers"] = avail_workers_list
     response["available_vehicles"] = avail_vehicles_list
 
