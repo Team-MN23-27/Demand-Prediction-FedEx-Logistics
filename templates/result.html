@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction Result - FedEx Demand Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --fedex-purple: #4d148c;
+            --fedex-purple-light: #6a1fb1;
+            --fedex-orange: #ff6200;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(160deg, #f4f6f9 0%, #eee9f8 100%);
+        }
+        .topbar { background: #fff; padding: 16px 0; box-shadow: 0 2px 12px rgba(24,10,46,0.06); }
+        .topbar .brand { font-weight: 800; color: var(--fedex-purple); font-size: 1.15rem; }
+        .topbar .brand i { color: var(--fedex-orange); margin-right: 8px; }
+        .nav-link-btn { border-radius: 10px; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; }
+        .user-badge {
+            display: inline-flex; align-items: center; gap: 8px; background: #f4f0fb;
+            color: var(--fedex-purple); border-radius: 20px; padding: 6px 16px; font-weight: 600; font-size: 0.85rem;
+        }
+
+        .result-hero {
+            background: linear-gradient(120deg, var(--fedex-purple) 0%, var(--fedex-purple-light) 55%, #8b3fd6 100%);
+            color: #fff; padding: 40px 0 70px 0; margin-bottom: -50px;
+            position: relative; overflow: hidden;
+        }
+        .result-hero .badge-hub { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; font-size: 0.82rem; font-weight: 600; }
+        .hero-illustration {
+            position: absolute; right: 0px; top: 50%; transform: translateY(-50%);
+            width: 220px; opacity: 0.95; pointer-events: none;
+        }
+        @media (max-width: 991px) { .hero-illustration { display: none; } }
+
+        .card { border: none; border-radius: 18px; box-shadow: 0 6px 24px rgba(24,10,46,0.09); }
+        .section-title { font-weight: 700; color: var(--fedex-purple); }
+        .stat-card {
+            border-radius: 16px; padding: 26px 16px; text-align: center; background: #fff;
+            border-top: 4px solid var(--fedex-orange);
+        }
+        .stat-card.purple-accent { border-top-color: var(--fedex-purple); }
+        .stat-number { font-size: 2.3rem; font-weight: 800; color: var(--fedex-purple); }
+        .stat-label { color: #888; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+
+        /* Availability check widget */
+        .avail-widget {
+            border-radius: 16px; padding: 22px; background: #fafaff; border: 1.5px solid #f0edf8;
+        }
+        .avail-widget .icon-circle {
+            width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 1.2rem; color: #fff;
+        }
+        .avail-widget.shortage .icon-circle { background: #e74c3c; }
+        .avail-widget.surplus .icon-circle { background: #27ae60; }
+        .avail-widget.exact .icon-circle { background: #8e8e93; }
+        .avail-bar { height: 10px; border-radius: 6px; background: #ece7f5; overflow: hidden; margin: 10px 0; }
+        .avail-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+        .shortage .avail-bar-fill { background: linear-gradient(90deg, #e74c3c, #ff6b5b); }
+        .surplus .avail-bar-fill { background: linear-gradient(90deg, #27ae60, #52d68a); }
+        .exact .avail-bar-fill { background: linear-gradient(90deg, #8e8e93, #b0b0b6); }
+        .status-badge { border-radius: 20px; padding: 4px 14px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+        .shortage .status-badge { background: #fdeceb; color: #e74c3c; }
+        .surplus .status-badge { background: #e9f9ee; color: #27ae60; }
+        .exact .status-badge { background: #f1f1f3; color: #8e8e93; }
+
+        .table thead { background: #f8f6fc; }
+        .table thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.3px; color: var(--fedex-purple); border: none; }
+        .table td { font-size: 0.9rem; vertical-align: middle; }
+        footer { color: #999; font-size: 0.82rem; padding: 24px 0; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap">
+        <span class="brand"><i class="fa-solid fa-truck-fast"></i>FedEx Demand Prediction</span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="user-badge"><i class="fa-solid fa-user"></i> {{ session.full_name }}</span>
+            <a href="/bookings" class="btn btn-outline-secondary nav-link-btn"><i class="fa-solid fa-calendar-check"></i> Bookings</a>
+            <a href="/logout" class="btn btn-outline-danger nav-link-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </div>
+</div>
+
+<div class="result-hero">
+    <div class="container">
+        <a href="/" class="btn btn-light btn-sm mb-3" style="border-radius:10px; font-weight:600;">
+            <i class="fa-solid fa-arrow-left"></i> New Prediction
+        </a>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h2 class="mb-1" style="font-weight:800;">{{ result.hub.replace('_',' ') }}</h2>
+                <p class="mb-0" style="opacity:0.9;">{{ result.date }} &nbsp;•&nbsp; {{ result.region }} Region</p>
+            </div>
+            {% if result.is_high_demand %}
+            <span class="badge-hub"><i class="fa-solid fa-triangle-exclamation"></i> High Demand</span>
+            {% endif %}
+        </div>
+    </div>
+    <svg class="hero-illustration" viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="130" cy="140" rx="110" ry="8" fill="rgba(0,0,0,0.15)"/>
+        <g>
+            <rect x="10" y="70" width="42" height="42" rx="4" fill="#ffffff" opacity="0.95"/>
+            <line x1="10" y1="91" x2="52" y2="91" stroke="#ff6200" stroke-width="3"/>
+            <line x1="31" y1="70" x2="31" y2="112" stroke="#ff6200" stroke-width="3"/>
+            <rect x="18" y="42" width="30" height="30" rx="3" fill="#ffe8d6" opacity="0.95"/>
+            <line x1="18" y1="57" x2="48" y2="57" stroke="#ff6200" stroke-width="2"/>
+            <line x1="33" y1="42" x2="33" y2="72" stroke="#ff6200" stroke-width="2"/>
+        </g>
+        <g>
+            <rect x="60" y="55" width="130" height="60" rx="6" fill="#ffffff"/>
+            <path d="M190 70 h32 l14 20 v25 h-46 z" fill="#ffffff"/>
+            <rect x="200" y="78" width="20" height="16" rx="2" fill="#4d148c" opacity="0.5"/>
+            <rect x="60" y="95" width="130" height="10" fill="#4d148c"/>
+            <rect x="190" y="98" width="46" height="7" fill="#4d148c"/>
+            <rect x="205" y="72" width="12" height="14" rx="2" fill="#c9b8ea"/>
+            <circle cx="95" cy="118" r="13" fill="#2b2b2b"/>
+            <circle cx="95" cy="118" r="5" fill="#cfcfcf"/>
+            <circle cx="205" cy="118" r="13" fill="#2b2b2b"/>
+            <circle cx="205" cy="118" r="5" fill="#cfcfcf"/>
+        </g>
+    </svg>
+</div>
+
+<div class="container" style="padding-top: 70px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category=='danger' else ('success' if category=='success' else 'info') }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="row g-3 mb-4">
+                <div class="col-4">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ result.demand }}</div>
+                        <div class="stat-label">Predicted Orders</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="stat-card purple-accent">
+                        <div class="stat-number">{{ result.workers }}</div>
+                        <div class="stat-label"><i class="fa-solid fa-people-group"></i> Workers Needed</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="stat-card purple-accent">
+                        <div class="stat-number">{{ result.vehicles }}</div>
+                        <div class="stat-label"><i class="fa-solid fa-truck"></i> Vehicles Needed</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-4 mb-4">
+                <h6 class="section-title mb-3"><i class="fa-solid fa-arrow-trend-up"></i> 14-Day Demand Trend</h6>
+                <canvas id="trendChart" height="120"></canvas>
+            </div>
+
+            {% if result.worker_gap or result.vehicle_gap %}
+            <div class="card p-4 mb-4">
+                <h6 class="section-title mb-3"><i class="fa-solid fa-scale-balanced"></i> Availability Check</h6>
+                <div class="row g-3">
+                    {% if result.worker_gap %}
+                    <div class="col-md-6">
+                        <div class="avail-widget {{ result.worker_gap.status }}">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="icon-circle"><i class="fa-solid fa-people-group"></i></div>
+                                <span class="status-badge">{{ result.worker_gap.status }}</span>
+                            </div>
+                            <div style="font-weight:700; color:#333;">Workers</div>
+                            <div style="font-size:0.85rem; color:#888;">Needed {{ result.worker_gap.needed }} • Available {{ result.worker_gap.available }}</div>
+                            <div class="avail-bar">
+                                <div class="avail-bar-fill" style="width: {{ [100, (result.worker_gap.available / result.worker_gap.needed * 100) if result.worker_gap.needed > 0 else 100] | min }}%;"></div>
+                            </div>
+                            <div style="font-size:0.85rem; color:#555;">{{ result.worker_gap.message }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if result.vehicle_gap %}
+                    <div class="col-md-6">
+                        <div class="avail-widget {{ result.vehicle_gap.status }}">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="icon-circle"><i class="fa-solid fa-truck"></i></div>
+                                <span class="status-badge">{{ result.vehicle_gap.status }}</span>
+                            </div>
+                            <div style="font-weight:700; color:#333;">Vehicles</div>
+                            <div style="font-size:0.85rem; color:#888;">Needed {{ result.vehicle_gap.needed }} • Available {{ result.vehicle_gap.available }}</div>
+                            <div class="avail-bar">
+                                <div class="avail-bar-fill" style="width: {{ [100, (result.vehicle_gap.available / result.vehicle_gap.needed * 100) if result.vehicle_gap.needed > 0 else 100] | min }}%;"></div>
+                            </div>
+                            <div style="font-size:0.85rem; color:#555;">{{ result.vehicle_gap.message }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="section-title mb-0"><i class="fa-solid fa-address-book"></i> Nearby Available Staff</h6>
+                    <span class="text-muted" style="font-size:0.78rem;">Hub avg: {{ result.staff_list.hub_avg }} orders/day</span>
+                </div>
+
+                <h6 class="mt-3 mb-2" style="font-size:0.9rem;"><i class="fa-solid fa-people-group text-danger"></i> Available Workers</h6>
+                {% if result.staff_list.workers %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead><tr><th>Name</th><th>Phone</th><th>Shift</th><th></th></tr></thead>
+                        <tbody>
+                        {% for w in result.staff_list.workers %}
+                            <tr>
+                                <td>{{ w.Name }}</td>
+                                <td>{{ w.Phone }}</td>
+                                <td>{{ w.ShiftStart }} - {{ w.ShiftEnd }}</td>
+                                <td>
+                                    <form action="/book" method="POST">
+                                        <input type="hidden" name="resource_type" value="worker">
+                                        <input type="hidden" name="resource_id" value="{{ w.WorkerID }}">
+                                        <input type="hidden" name="hub" value="{{ result.hub }}">
+                                        <input type="hidden" name="date_from" value="{{ result.date }}">
+                                        <input type="hidden" name="date_to" value="{{ result.date }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" style="border-radius:8px; font-size:0.78rem;">
+                                            <i class="fa-solid fa-calendar-plus"></i> Book
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-danger" style="font-size:0.9rem;">No available workers at this hub right now!</p>
+                {% endif %}
+
+                <h6 class="mt-3 mb-2" style="font-size:0.9rem;"><i class="fa-solid fa-truck text-danger"></i> Available Vehicles</h6>
+                {% if result.staff_list.vehicles %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead><tr><th>Driver</th><th>Phone</th><th>Vehicle Type</th><th></th></tr></thead>
+                        <tbody>
+                        {% for v in result.staff_list.vehicles %}
+                            <tr>
+                                <td>{{ v.DriverName }}</td>
+                                <td>{{ v.Phone }}</td>
+                                <td>{{ v.VehicleType }}</td>
+                                <td>
+                                    <form action="/book" method="POST">
+                                        <input type="hidden" name="resource_type" value="vehicle">
+                                        <input type="hidden" name="resource_id" value="{{ v.VehicleID }}">
+                                        <input type="hidden" name="hub" value="{{ result.hub }}">
+                                        <input type="hidden" name="date_from" value="{{ result.date }}">
+                                        <input type="hidden" name="date_to" value="{{ result.date }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" style="border-radius:8px; font-size:0.78rem;">
+                                            <i class="fa-solid fa-calendar-plus"></i> Book
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-danger" style="font-size:0.9rem;">No available vehicles at this hub right now!</p>
+                {% endif %}
+
+                <p class="text-muted mt-2 mb-0" style="font-size:0.78rem;">
+                    <i class="fa-solid fa-circle-info"></i> Sample/demo data — not real staff records.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer>
+    <i class="fa-solid fa-truck-fast"></i> FedEx Shipment Demand Prediction &nbsp;•&nbsp; LightGBM-powered forecasting
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+const trendData = {{ trend | tojson }};
+const trendLabels = trendData.map(d => d.date).concat(['{{ result.date }}']);
+const trendValues = trendData.map(d => d.demand).concat([{{ result.demand }}]);
+const pointColors = trendData.map(() => '#4d148c').concat(['#ff6200']);
+const pointRadii = trendData.map(() => 3).concat([7]);
+
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: trendLabels,
+        datasets: [{
+            label: 'Orders',
+            data: trendValues,
+            borderColor: '#6a1fb1',
+            backgroundColor: 'rgba(106,31,177,0.08)',
+            tension: 0.35,
+            fill: true,
+            pointBackgroundColor: pointColors,
+            pointRadius: pointRadii
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: false, grid: { color: '#f0eef7' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+</script>
+</body>
+</html>

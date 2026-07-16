@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - FedEx Demand Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fedex-purple: #4d148c;
+            --fedex-purple-light: #6a1fb1;
+            --fedex-orange: #ff6200;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--fedex-purple) 0%, var(--fedex-purple-light) 50%, #8b3fd6 100%);
+            background-image:
+                linear-gradient(135deg, rgba(77,20,140,0.92) 0%, rgba(106,31,177,0.92) 50%, rgba(139,63,214,0.92) 100%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='180' viewBox='0 0 220 180'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='2.5' opacity='0.15'%3E%3Crect x='10' y='90' width='55' height='32' rx='3'/%3E%3Crect x='65' y='100' width='28' height='22' rx='2'/%3E%3Ccircle cx='28' cy='126' r='7'/%3E%3Ccircle cx='80' cy='126' r='7'/%3E%3Cline x1='18' y1='100' x2='55' y2='100'/%3E%3Crect x='120' y='30' width='24' height='24' rx='2'/%3E%3Cline x1='120' y1='42' x2='144' y2='42'/%3E%3Cline x1='132' y1='30' x2='132' y2='54'/%3E%3Crect x='155' y='55' width='18' height='18' rx='2'/%3E%3Cpath d='M100 140 Q 140 120 180 140 T 220 130' stroke-dasharray='4,5'/%3E%3Ccircle cx='190' cy='75' r='9'/%3E%3Cpath d='M190 84 L190 100'/%3E%3C/g%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 220px 180px;
+            padding: 20px;
+        }
+        .login-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .brand-icon {
+            width: 64px; height: 64px; border-radius: 16px;
+            background: linear-gradient(135deg, var(--fedex-purple), var(--fedex-purple-light));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: #fff; margin: 0 auto 16px auto;
+        }
+        h3 { font-weight: 800; color: var(--fedex-purple); text-align: center; }
+        .subtitle { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 28px; }
+        .form-label { font-weight: 600; font-size: 0.85rem; color: #4a4a4a; }
+        .form-control {
+            border-radius: 10px; border: 1.5px solid #e3e3ec; padding: 11px 14px;
+        }
+        .form-control:focus {
+            border-color: var(--fedex-purple-light);
+            box-shadow: 0 0 0 3px rgba(106,31,177,0.12);
+        }
+        .btn-fedex {
+            background: linear-gradient(135deg, var(--fedex-orange), #ff8534);
+            border: none; color: #fff; font-weight: 700; border-radius: 10px;
+            padding: 11px; letter-spacing: 0.3px;
+            box-shadow: 0 6px 16px rgba(255,98,0,0.35);
+        }
+        .btn-fedex:hover { background: linear-gradient(135deg, #e65800, #ff6e1a); color: #fff; }
+        .demo-hint {
+            background: #f8f6fc; border-radius: 10px; padding: 12px 14px;
+            font-size: 0.8rem; color: #6a1fb1; margin-top: 20px;
+        }
+        a { color: var(--fedex-purple-light); font-weight: 600; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="brand-icon"><i class="fa-solid fa-truck-fast"></i></div>
+    <h3>FedEx Demand Prediction</h3>
+    <p class="subtitle">Sign in to access the dashboard</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category=='danger' else ('success' if category=='success' else 'info') }} alert-dismissible fade show" role="alert" style="font-size:0.88rem;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/login">
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Enter username" required autofocus>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+        </div>
+        <button type="submit" class="btn btn-fedex w-100 mt-2">
+            <i class="fa-solid fa-right-to-bracket"></i>&nbsp; Login
+        </button>
+    </form>
+
+    <p class="text-center mt-3 mb-0" style="font-size:0.88rem; color:#888;">
+        Don't have an account? <a href="/register">Register here</a>
+    </p>
+
+    <div class="demo-hint">
+        <i class="fa-solid fa-circle-info"></i> Demo login: <strong>admin</strong> / <strong>admin123</strong>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
