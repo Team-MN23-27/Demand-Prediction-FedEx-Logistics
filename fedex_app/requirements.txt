@@ -2,4 +2,5 @@ flask
 lightgbm
 pandas
 numpy
-pyngrok
+werkzeug
+gunicorn
