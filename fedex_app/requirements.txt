@@ -1,0 +1,6 @@
+flask
+lightgbm
+pandas
+numpy
+werkzeug
+gunicorn
