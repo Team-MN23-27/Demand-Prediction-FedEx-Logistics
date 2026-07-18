@@ -50,9 +50,9 @@ df["Holiday_Indicator_Encoded"] = df["Holiday_Indicator"]
 df["Festival_Name_Encoded"] = df["Festival_Name"].map(FESTIVAL_MAP)
 df["Season_Encoded"] = df["Season"].map(SEASON_MAP)
 
-# ==========================================
+
 # 3. DATE-BASED FEATURES
-# ==========================================
+
 df["Year"] = df["Date"].dt.year
 df["Month"] = df["Date"].dt.month
 df["Day"] = df["Date"].dt.day
