@@ -39,7 +39,7 @@ MONTH_TO_SEASON = {
 }
 df["Season"] = df["Date"].dt.month.map(MONTH_TO_SEASON)
 
-# LabelEncoder-mathiri alphabetical encoding (verified against dataset):
+
 # Holiday_Indicator: 0/1 already numeric
 # Festival_Name: Gandhi_Jayanti=0, Independence_Day=1, None=2, Pongal=3
 # Season: Autumn=0, Monsoon=1, Summer=2, Winter=3
@@ -77,19 +77,16 @@ df["OrderCount_rolling_std_7"] = df.groupby("Hub")["OrderCount"].transform(
     lambda x: x.shift(1).rolling(7).std()
 )
 
-# Muthal 14 naal ovvoru Hub-kum lag/rolling NaN-a irukum (history illa) -> drop pannrom
+
 lag_cols = [
     "OrderCount_lag_1", "OrderCount_lag_7", "OrderCount_lag_14",
     "OrderCount_rolling_mean_7", "OrderCount_rolling_std_7",
 ]
 df = df.dropna(subset=lag_cols).reset_index(drop=True)
 
-# ==========================================
+
 # 5. SCALE LAG/ROLLING FEATURES (StandardScaler)
-# ==========================================
-# NOTE: Idhே than OrderCount actual raw value-a vidama, indha 5 lag/rolling
-# columns mattum scale pannirukanga (z-score). Same scaler-ah training and
-# prediction rendukum use pannanum, so scaler-ah save pannurom.
+
 scaler = StandardScaler()
 df[lag_cols] = scaler.fit_transform(df[lag_cols])
 
@@ -97,9 +94,9 @@ import joblib
 joblib.dump(scaler, "lag_feature_scaler.pkl")
 print("Scaler saved as lag_feature_scaler.pkl (prediction-ku idhே use pannanum)")
 
-# ==========================================
+
 # 6. FINAL COLUMN ORDER & SAVE
-# ==========================================
+
 final_cols = [
     "Date", "Hub", "Region", "OrderCount", "NumberOfPieces", "TotalRevenue",
     "Holiday_Indicator_Encoded", "Festival_Name_Encoded", "Season_Encoded",
