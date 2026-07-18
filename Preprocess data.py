@@ -61,9 +61,9 @@ df["WeekOfYear"] = df["Date"].dt.isocalendar().week.astype(int)
 df["IsWeekend"] = df["DayOfWeek"].isin([5, 6]).astype(int)
 df["Quarter"] = df["Date"].dt.quarter
 
-# ==========================================
+
 # 4. LAG & ROLLING FEATURES (per Hub, chronological)
-# ==========================================
+
 df = df.sort_values(["Hub", "Date"]).reset_index(drop=True)
 
 df["OrderCount_lag_1"] = df.groupby("Hub")["OrderCount"].shift(1)
