@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 # 1. LOAD RAW DATA
 
-RAW_FILE = "raw_shipment_data.csv"   # <- un raw file name-ah ivvide podunga
+RAW_FILE = "raw_shipment_data.csv"   
 df = pd.read_csv(RAW_FILE)
 
 df["Date"] = pd.to_datetime(df["Date"])
