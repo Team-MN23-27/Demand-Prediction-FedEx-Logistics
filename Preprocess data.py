@@ -1,18 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Preprocess.py
-==============================================
-RAW shipment data-ah edukku, LightGBM model-ku venum features
-build pannum full preprocessing pipeline.
 
-Ithu already irukura 'preprocessed_demand_data.csv' file-ah
-analyze panni reverse-engineer pannina pipeline.
-
-INPUT (raw data) expected columns:
-    Date, Hub, Region, OrderCount, NumberOfPieces, TotalRevenue
-
-Output: preprocessed_demand_data.csv (21 columns, model-ready)
-"""
 
 import pandas as pd
 import numpy as np
