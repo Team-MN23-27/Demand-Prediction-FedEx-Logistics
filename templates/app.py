@@ -14,9 +14,9 @@ app.secret_key = "fedex-demand-app-secret-key"  # flash messages ku venum
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ==========================================
+
 # 1. LOAD MODEL & HISTORICAL DATA (once at startup)
-# ==========================================
+
 MODEL_PATH = os.path.join(BASE_DIR, "models", "lightgbm_model.txt")
 HIST_PATH = os.path.join(BASE_DIR, "data", "historical_orders.csv")
 DB_PATH = os.path.join(BASE_DIR, "data", "fedex_resources.db")
@@ -78,9 +78,9 @@ def init_db_if_needed():
 
 init_db_if_needed()
 
-# ==========================================
+
 # 2. FIXED MAPPINGS (from dataset analysis)
-# ==========================================
+
 HUB_TO_REGION = {
     "Bengaluru_Hub": "South",
     "Chennai_Hub": "South",
@@ -113,18 +113,15 @@ SCALER_STD = {
     "roll_mean7": 90.63609427, "roll_std7": 61.83228815,
 }
 
-# ==========================================
+
 # 3. CAPACITY ASSUMPTIONS (workers/vehicles)
-# ==========================================
+
 SHIPMENTS_PER_WORKER = 40    # 1 worker handles 40 shipments/day
 SHIPMENTS_PER_VEHICLE = 150  # 1 delivery vehicle carries 150 shipments/day
 
 
 def get_lag_features(hub, target_date):
-    """
-    Andha hub-oda actual order history-la irundhu lag/rolling features calculate pannrom.
-    Target date dataset range-ku appuram irundha (future), last known values-ah proxy-a use pannrom.
-    """
+   
     hub_hist = hist_df[hist_df["Hub"] == hub].sort_values("Date")
 
     if target_date <= LAST_DATE:
@@ -313,9 +310,9 @@ def login_required(f):
     return decorated
 
 
-# ==========================================
+
 # 4. AUTH ROUTES
-# ==========================================
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -375,9 +372,9 @@ def logout():
     return redirect(url_for("login"))
 
 
-# ==========================================
+
 # 5. ROUTES
-# ==========================================
+
 @app.route("/")
 @login_required
 def home():
@@ -451,10 +448,7 @@ def predict():
 @app.route("/book", methods=["POST"])
 @login_required
 def book_resource():
-    """
-    Oru shot-la multiple workers/vehicles book pannrom.
-    Form-la 'worker_ids' (multiple checkboxes) and 'vehicle_ids' (multiple checkboxes) varum.
-    """
+   
     worker_ids = request.form.getlist("worker_ids")
     vehicle_ids = request.form.getlist("vehicle_ids")
     hub = request.form.get("hub")
@@ -515,7 +509,7 @@ def book_resource():
 @app.route("/bookings")
 @login_required
 def view_bookings():
-    """Ella active bookings-um kaamikum page - hub filter pannalam."""
+
     hub_filter = request.args.get("hub", "")
     conn = get_db()
 
@@ -544,7 +538,7 @@ def view_bookings():
 @app.route("/bookings/cancel/<int:booking_id>", methods=["POST"])
 @login_required
 def cancel_booking(booking_id):
-    """Booking-ah cancel pannrom (undo) - Status 'cancelled' aaki vidrom."""
+   
     conn = get_db()
     conn.execute("UPDATE bookings SET Status='cancelled' WHERE BookingID=?", (booking_id,))
     conn.commit()
@@ -556,7 +550,7 @@ def cancel_booking(booking_id):
 
 @app.route("/api/predict", methods=["POST"])
 def api_predict():
-    """JSON API version - Chart.js dashboard or external tools ku."""
+   
     data = request.get_json()
     date_str = data.get("date")
     hub = data.get("hub")
