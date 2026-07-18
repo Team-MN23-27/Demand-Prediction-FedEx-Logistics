@@ -4,9 +4,9 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-# ==========================================
+
 # 1. LOAD RAW DATA
-# ==========================================
+
 RAW_FILE = "raw_shipment_data.csv"   # <- un raw file name-ah ivvide podunga
 df = pd.read_csv(RAW_FILE)
 
