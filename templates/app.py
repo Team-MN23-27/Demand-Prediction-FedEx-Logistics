@@ -1,10 +1,3 @@
-"""
-FedEx Shipment Demand Prediction - Flask App
-==============================================
-Date + Hub kudutha, andha day-ku evlo demand (OrderCount) varum nu predict pannum.
-Adha vachi evlo workers + delivery vehicles venum nu suggest pannum.
-"""
-
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
