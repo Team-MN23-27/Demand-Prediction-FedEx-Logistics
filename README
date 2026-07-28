@@ -103,31 +103,6 @@ Root Mean Squared Error (RMSE)
 R² Score
 
 
-Technologies Used
-
-* Python
-* Pandas
-* NumPy
-* Scikit-learn
-* LightGBM
-* Matplotlib
-* Joblib
-* Jupyter Notebook
-* VS Code
-
-
-Project Workflow
-
-1. Load Dataset
-2. Data Cleaning
-3. Feature Engineering
-4. Data Preprocessing
-5. Train-Test Split
-6. Model Training
-7. Model Evaluation
-8. Demand Prediction
-9. Result Visualization
-
 Project Structure
 
 Demand-Prediction-Project/
