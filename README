@@ -1,8 +1,3 @@
- Live Demo
-
-**Live App**: https://demand-prediction-fedex-logistics-wap7.onrender.com
-
-Login: `admin` / `admin123` (demo account) or register a new account.
 
 
 Demand Prediction in FedEx Logistics Using Historical Data
@@ -138,3 +133,10 @@ Develop an interactive dashboard.
 Deploy the model using FastAPI.
 Support hub-wise and region-wise demand forecasting.
 Enable automated fleet and warehouse resource planning.
+
+ Live Demo
+
+**Live App**: https://demand-prediction-fedex-logistics-wap7.onrender.com
+
+Login: `admin` / `admin123` (demo account) or register a new account.
+
