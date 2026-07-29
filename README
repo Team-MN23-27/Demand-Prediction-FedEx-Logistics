@@ -33,29 +33,9 @@ Dataset
 
 The project uses a historical shipment demand dataset containing shipment information, revenue details, hub locations, and time-based features.
 
-Dataset Columns
+The dataset used for this project is available here:
 
-* Date
-* Hub
-* Region
-* OrderCount
-* NumberOfPieces
-* TotalRevenue
-* Holiday_Indicator_Encoded
-* Festival_Name_Encoded
-* Season_Encoded
-* Year
-* Month
-* Day
-* DayOfWeek
-* WeekOfYear
-* IsWeekend
-* Quarter
-* OrderCount_lag_1
-* OrderCount_lag_7
-* OrderCount_lag_14
-* OrderCount_rolling_mean_7
-* OrderCount_rolling_std_7
+- [india_demand Dataset](dataset/india_demand_dataset.xlsx)
 
 
 
