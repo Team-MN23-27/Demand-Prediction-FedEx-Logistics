@@ -1,17 +1,11 @@
-
-
-# Demand Prediction in FedEx Logistics Using Historical Data
-
+##Demand Prediction in FedEx Logistics Using Historical Data
 
 Department: B.Tech Artificial Intelligence and Data Science
 Institution: E.G.S. Pillay Engineering College
 
-
 Project Overview
 
 This project predicts future shipment demand using historical logistics data. The system helps logistics companies like FedEx forecast shipment volumes in advance, enabling efficient fleet allocation, warehouse capacity planning, and staffing decisions. By analyzing historical shipment patterns, seasonal trends, and holiday effects, the system provides accurate demand predictions that help reduce operational costs and improve logistics efficiency.
-
-
 
 Problem Statement
 
